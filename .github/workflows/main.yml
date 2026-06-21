@@ -1,13 +1,20 @@
 name: auto deb
 on: 
   push: 
-    branches:  [ main ]
+    tags:
+      - 'v*'
 jobs:
   say-hello:
     runs-on: ubuntu-latest
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
+      
+      - name: 获取版本号
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: 更新control里的版本号
+        run: sed -i "s/^Version:.*/Version: ${VERSION}/" make-deb/DEBIAN/control
 
       - name: add execute mode
         run: chmod +x make-deb/usr/bin/hello
@@ -16,15 +23,22 @@ jobs:
         run: sudo apt update && sudo apt install dpkg-dev -y
 
       - name: 打包deb
-        run: dpkg-deb --build make-deb
+        run: dpkg-deb --build make-deb make-deb-${ VERSION }.deb
 
       - name: 列出打包结果
-        run: ls -lh make-deb.deb
+        run: ls -lh make-deb*.deb
       
       - name: 上传deb包
         uses: actions/upload-artifact@v4
         with:
-          name: make-deb-package
-          path: make-deb.deb
+          name: make-deb-${{ env.VERSION }}
+          path: make-deb*.deb
+        
+      - name: 发布到release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: make-deb*.deb
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
