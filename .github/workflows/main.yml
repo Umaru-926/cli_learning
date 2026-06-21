@@ -10,15 +10,15 @@ jobs:
         uses: actions/checkout@v4
 
       - name: add execute mode
-        uses: chmod +x make-deb/usr/bin/hello
+        run: chmod +x make-deb/usr/bin/hello
 
       - name: 安装依赖包
-        uses: sudo apt update && sudo apt install dpkg-dev -y
+        run: sudo apt update && sudo apt install dpkg-dev -y
 
       - name: 打包deb
-        uses: dpkg-deb --build my-deb
+        run: dpkg-deb --build my-deb
 
       - name: 列出打包结果
-        uses: ls -lh my-deb.deb
+        run: ls -lh my-deb.deb
 
 
