@@ -24,7 +24,6 @@ jobs:
       - name: 上传deb包
         uses: actions/upload-artifact@v4
         with:
-          name: make-deb-package
           path: make-deb.deb
 
 
