@@ -1,0 +1,16 @@
+name: my-first-ci/cd
+on: 
+  push: 
+    branches:  [ main ]
+jobs:
+  say-hello:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+      - name: 打印 hello
+        run: echo 'hello git ci/cd'
+      - name: 最后输出
+        run: echo '流水线配置成功'
+
+
