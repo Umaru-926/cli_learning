@@ -1,4 +1,4 @@
-name: my-first-ci/cd
+name: auto deb
 on: 
   push: 
     branches:  [ main ]
@@ -8,9 +8,17 @@ jobs:
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
-      - name: 打印 hello
-        run: echo 'hello git ci/cd'
-      - name: 最后输出
-        run: echo '流水线配置成功'
+
+      - name: add execute mode
+        uses: chmod +x make-deb/usr/bin/hello
+
+      - name: 安装依赖包
+        uses: sudo apt update && sudo apt install dpkg-dev -y
+
+      - name: 打包deb
+        uses: dpkg-deb --build my-deb
+
+      - name: 列出打包结果
+        uses: ls -lh my-deb.deb
 
 
