@@ -22,7 +22,7 @@ jobs:
         run: ls -lh make-deb.deb
       
       - name: 上传deb包
-        uses: actionso/upload-artifact@v4
+        uses: actions/upload-artifact@v4
         with:
           name: make-deb-package
           path: make-deb.deb
