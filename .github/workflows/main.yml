@@ -16,9 +16,9 @@ jobs:
         run: sudo apt update && sudo apt install dpkg-dev -y
 
       - name: 打包deb
-        run: dpkg-deb --build my-deb
+        run: dpkg-deb --build make-deb
 
       - name: 列出打包结果
-        run: ls -lh my-deb.deb
+        run: ls -lh make-deb.deb
 
 
