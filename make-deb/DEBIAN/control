@@ -1,0 +1,8 @@
+Package: make-deb
+Version: 0.0.1-20260601
+Sections: utils
+Prioprity: optional
+Depends: python3
+Architecture: all
+Maintainer: wenkaicao
+Description: 我打的第一个deb包
