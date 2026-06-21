@@ -24,7 +24,7 @@ jobs:
         run: sudo apt update && sudo apt install dpkg-dev -y
 
       - name: 打包deb
-        run: dpkg-deb --build make-deb make-deb-${ VERSION }.deb
+        run: dpkg-deb --build make-deb make-deb-${VERSION}.deb
 
       - name: 列出打包结果
         run: ls -lh make-deb*.deb
