@@ -14,7 +14,8 @@ jobs:
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
       - name: 更新control里的版本号
-        run: sed -i "s/^Version:.*/Version: ${VERSION}/" make-deb/DEBIAN/control
+        run: |
+          sed -i "s/^Version:.*/Version: ${VERSION}/" make-deb/DEBIAN/control
 
       - name: add execute mode
         run: chmod +x make-deb/usr/bin/hello
