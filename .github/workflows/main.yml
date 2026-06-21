@@ -20,5 +20,11 @@ jobs:
 
       - name: 列出打包结果
         run: ls -lh make-deb.deb
+      
+      - name: 上传deb包
+        uses: actionso/upload-artifact@v4
+        with:
+          name: make-deb-package
+          path: make-deb.deb
 
 
