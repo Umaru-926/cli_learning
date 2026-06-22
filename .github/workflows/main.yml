@@ -1,0 +1,81 @@
+name: auto deb
+on: 
+  push: 
+    tags:
+      - 'v*'
+jobs:
+  say-hello:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+      
+      - name: 获取版本号
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: 更新control里的版本号
+        run: |
+          sed -i "s/^Version:.*/Version: ${VERSION}/" make-deb/DEBIAN/control
+
+      - name: add execute mode
+        run: chmod +x make-deb/usr/bin/hello
+
+      - name: 安装依赖包
+        run: sudo apt update && sudo apt install dpkg-dev -y
+
+      - name: 打包deb
+        run: dpkg-deb --build make-deb make-deb-${VERSION}.deb
+
+      - name: 列出打包结果
+        run: ls -lh make-deb*.deb
+      
+      - name: 上传deb包
+        uses: actions/upload-artifact@v4
+        with:
+          name: make-deb-${{ env.VERSION }}
+          path: make-deb*.deb
+        
+      - name: 发布到release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: make-deb*.deb
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
+  deploy-deb:
+    needs: say-hello
+    runs-on: ubuntu-latest
+    steps:
+      - name: 获取版本号
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+      
+      - name: 安装依赖
+        run: sudo apt update && sudo apt install dpkg-dev apt-utils -y
+
+      - name: 下载deb包
+        uses: actions/download-artifact@v4
+        with:
+          name: make-deb-${{env.VERSION}}
+          path: ./artifact
+      - name: 生成APT仓库 并签名
+        run: |
+          mkdir -p repo/pool
+          cp ./artifact/*.deb repo/pool/
+          cd repo
+          dpkg-scanpackages --multiversion pool /dev/null | gzip -9c > Packages.gz # 生成软件包索引
+          apt-ftparchive --md5 --sha256 --sha512 release . > Release # 生成Release清单文件
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import # 导入私钥
+          # 对Release文件进行分离式签名, 生成Release文件
+          gpg --batch --pinentry-mode loopback --passphrase "${{ secrets.GPG_PASSPHRASE }}" -abs -o Release.gpg Release
+          ls -la
+          
+      
+      - name: 部署到GitHubs Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./repo
+          publish_branch: gh-pages
+          keep_files: true
+
+
