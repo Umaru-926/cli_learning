@@ -64,7 +64,7 @@ jobs:
           cd repo
           dpkg-scanpackages --multiversion pool /dev/null | gzip -9c > Packages.gz # 生成软件包索引
           apt-ftparchive release . > Release # 生成Release清单文件
-          echo "${{ secrets.GPG_PRIVATE_KEY }}" > gpg --batch --import # 导入私钥
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import # 导入私钥
           # 对Release文件进行分离式签名, 生成Release文件
           gpg -batch --pinentry-mode loopback --passphrase "${{ secrets.GPG_PASSPHRASE }}" -abs -o Release.gpg Release
           ls -la
