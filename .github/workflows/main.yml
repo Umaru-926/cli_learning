@@ -50,20 +50,25 @@ jobs:
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
       
       - name: 安装依赖
-        run: sudo apt update && sudo apt install dpkg-dev -y
+        run: sudo apt update && sudo apt install dpkg-dev apt-utils -y
 
       - name: 下载deb包
         uses: actions/download-artifact@v4
         with:
           name: make-deb-${{env.VERSION}}
           path: ./artifact
-      - name: 生成APT仓库
+      - name: 生成APT仓库 并签名
         run: |
           mkdir -p repo/pool
           cp ./artifact/*.deb repo/pool/
           cd repo
-          dpkg-scanpackages --multiversion pool /dev/null | gzip -9c > Packages.gz
+          dpkg-scanpackages --multiversion pool /dev/null | gzip -9c > Packages.gz # 生成软件包索引
+          apt-ftparchive release . > Release # 生成Release清单文件
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" > gpg --batch --import # 导入私钥
+          # 对Release文件进行分离式签名, 生成Release文件
+          gpg -batch --pinentry-mode loopback --passphrase "${{ secrets.GPG_PASSPHRASE }}" -abs -o Release.gpg Release
           ls -la
+          
       
       - name: 部署到GitHubs Pages
         uses: peaceiris/actions-gh-pages@v3
