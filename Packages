@@ -1,0 +1,14 @@
+Package: make-deb
+Version: 1.1.6
+Architecture: all
+Maintainer: wenkaicao
+Depends: python3
+Filename: pool/make-deb-1.1.6.deb
+Size: 674
+MD5sum: 14fda553a71f7508576b606430f26aa9
+SHA1: e995b211c9636432c9e022f7423854cac0ec8702
+SHA256: d99f0c1f94f2679ba61c62d75a0bbea591ddc490d6efabe1bb5e216e7a952711
+Description: 我打的第一个deb包
+Prioprity: optional
+Sections: utils
+
