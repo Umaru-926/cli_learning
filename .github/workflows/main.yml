@@ -41,5 +41,36 @@ jobs:
           files: make-deb*.deb
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
+  deploy-deb:
+    needs: say-hello
+    runs-on: ubuntu-latest
+    steps:
+      - name: 获取版本号
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+      
+      - name: 安装依赖
+        run: sudo apt update && sudo apt install dpkg-dev -y
+
+      - name: 下载deb包
+        uses: actions/download-artifact@v4
+        with:
+          name: make-deb-${{env.VERSION}}
+          path: ./artifact
+      - name: 生成APT仓库
+        run: |
+          mkdir -p repo/pool
+          cp ./artifact/*.deb repo/pool/
+          cd repo
+          dpkg-scanpackages --multiversion pool /dev/null | gzip -9c > Packages.gz
+          ls -la
+      
+      - name: 部署到GitHubs Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./repo
+          publish_branch: gh-pages
+          keep_files: true
 
 
